@@ -1,0 +1,7 @@
+name = "weekly-winners-render"
+main = "worker/index.js"
+compatibility_date = "2026-05-18"
+
+# The OpenAI key is set as a secret with:
+#   npx wrangler secret put OPENAI_API_KEY
+# (paste the key when prompted — never commit it here)
