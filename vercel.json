@@ -1,8 +1,1 @@
-{
-  "rewrites": [
-    {
-      "source": "/api/render",
-      "destination": "https://weekly-winners-render.vithurushan04.workers.dev/api/render"
-    }
-  ]
-}
+{}

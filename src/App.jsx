@@ -26,6 +26,10 @@ import realisticRest from './assets/template-halves/realistic-rest.png';
 import rainbowTop3 from './assets/template-halves/rainbow-top3.png';
 import rainbowRest from './assets/template-halves/rainbow-rest.png';
 
+const RENDER_URL = import.meta.env.DEV
+  ? '/api/render'
+  : 'https://weekly-winners-render.vithurushan04.workers.dev/api/render';
+
 const SPLIT_POSTER_SIZE = { width: 768, height: 1024 };
 
 const posterGroups = [
@@ -299,7 +303,7 @@ function App() {
       formData.append('quality', 'high');
       formData.append('n', '1');
 
-      const resp = await fetch('/api/render', { method: 'POST', body: formData });
+      const resp = await fetch(RENDER_URL, { method: 'POST', body: formData });
       const text = await resp.text();
       let json;
       try {
