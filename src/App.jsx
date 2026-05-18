@@ -152,78 +152,56 @@ const starterData = {
       branch: 'BROXBOURNE',
       penetration: '56.93',
       signups: '115',
-      performers: [
-        { name: 'Uday', score: '40' },
-        { name: 'Aruna', score: '20' },
-        { name: 'Vini', score: '20' },
-      ],
+      performers: 'Uday - 40\nAruna - 20\nVini - 20',
     },
     {
       place: 2,
       branch: 'SAWBRIDGEWORTH',
       penetration: '54.39',
       signups: '163',
-      performers: [{ name: '-', score: '' }],
+      performers: '',
     },
     {
       place: 3,
       branch: 'HALFMOON',
       penetration: '53.2',
       signups: '64',
-      performers: [
-        { name: 'Shehana', score: '20' },
-        { name: 'Mohana', score: '15' },
-      ],
+      performers: 'Shehana - 20\nMohana - 15',
     },
     {
       place: 4,
       branch: 'EPPING',
       penetration: '51.62',
       signups: '74',
-      performers: [
-        { name: 'Sangeetha', score: '39' },
-        { name: 'Uday', score: '13' },
-      ],
+      performers: 'Sangeetha - 39\nUday - 13',
     },
     {
       place: 5,
       branch: 'ENFIELD',
       penetration: '39.38',
       signups: '39',
-      performers: [
-        { name: 'Mohana', score: '16' },
-        { name: 'Sandra', score: '14' },
-      ],
+      performers: 'Mohana - 16\nSandra - 14',
     },
     {
       place: 6,
       branch: 'BULLSMOOR',
       penetration: '36.87',
       signups: '76',
-      performers: [
-        { name: 'Mano', score: '40' },
-        { name: 'Mohana', score: '25' },
-      ],
+      performers: 'Mano - 40\nMohana - 25',
     },
     {
       place: 7,
       branch: 'BUCKHURST',
       penetration: '36.82',
       signups: '71',
-      performers: [
-        { name: 'Ravi', score: '38' },
-        { name: 'Raja', score: '10' },
-      ],
+      performers: 'Ravi - 38\nRaja - 10',
     },
     {
       place: 8,
       branch: 'HARLOW',
       penetration: '33.86',
       signups: '72',
-      performers: [
-        { name: 'Taya', score: '44' },
-        { name: 'Karthika', score: '15' },
-      ],
+      performers: 'Taya - 44\nKarthika - 15',
     },
   ],
 };
@@ -246,29 +224,6 @@ function sanitizeFileName(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '');
-}
-
-function performersToText(performers) {
-  return performers
-    .map((performer) =>
-      performer.score ? `${performer.name} - ${performer.score}` : performer.name,
-    )
-    .join('\n');
-}
-
-function textToPerformers(text) {
-  const performers = text
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [name, ...scoreParts] = line.split(/\s+-\s+|,\s*/);
-      return {
-        name: name?.trim() || '-',
-        score: scoreParts.join(' ').trim(),
-      };
-    });
-  return performers.length ? performers : [{ name: '-', score: '' }];
 }
 
 function getSortedWinners(winners) {
@@ -746,14 +701,13 @@ function DataFormScreen({
                   <input
                     value={winner.branch}
                     onChange={(event) =>
-                      onUpdateWinner(winner.place, 'branch', event.target.value.toUpperCase())
+                      onUpdateWinner(winner.place, 'branch', event.target.value)
                     }
                   />
                 </label>
                 <label>
                   Penetration %
                   <input
-                    inputMode="decimal"
                     value={winner.penetration}
                     onChange={(event) =>
                       onUpdateWinner(winner.place, 'penetration', event.target.value)
@@ -763,7 +717,6 @@ function DataFormScreen({
                 <label>
                   New sign ups
                   <input
-                    inputMode="numeric"
                     value={winner.signups}
                     onChange={(event) =>
                       onUpdateWinner(winner.place, 'signups', event.target.value)
@@ -773,13 +726,9 @@ function DataFormScreen({
                 <label className="wide-field">
                   Best performers
                   <textarea
-                    value={performersToText(winner.performers)}
+                    value={winner.performers}
                     onChange={(event) =>
-                      onUpdateWinner(
-                        winner.place,
-                        'performers',
-                        textToPerformers(event.target.value),
-                      )
+                      onUpdateWinner(winner.place, 'performers', event.target.value)
                     }
                   />
                 </label>
@@ -826,17 +775,19 @@ function buildAiPrompt({ data, feedback, group, refinePrevious, template }) {
   });
 
   const winnerLines = winners.map((winner) => {
-    const performers = (winner.performers || [])
-      .filter((performer) => performer.name && performer.name !== '-')
-      .map((performer) =>
-        performer.score ? `${performer.name} (${performer.score})` : performer.name,
-      )
-      .join(', ');
+    const performersText = (winner.performers || '').trim();
+    const performersLines = performersText
+      ? performersText
+          .split('\n')
+          .map((line) => `        ${line}`)
+          .join('\n')
+      : '        none';
     return [
       `  - ${ordinal(winner.place)} place: branch "${winner.branch}"`,
       `      Go Plus Penetration: ${winner.penetration}%`,
       `      New Sign Ups: ${winner.signups}`,
-      `      Best Performers: ${performers || 'none'}`,
+      `      Best Performers:`,
+      performersLines,
     ].join('\n');
   });
 
